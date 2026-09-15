@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <gx2/surface.h>
 #include <gx2/swap.h>
-#include <hpad/hpad.h>
+#include <nn/hpad/hpad.h>
 #include <notifications/notifications.h>
 #include <wups.h>
 
