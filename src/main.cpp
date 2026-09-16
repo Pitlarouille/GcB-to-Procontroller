@@ -1,3 +1,5 @@
+#include <cstdio>
+#include <nn/hpad/hpad.h>
 #include <notifications/notifications.h>
 #include <wups.h>
 
@@ -15,6 +17,13 @@ INITIALIZE_PLUGIN() {
     if (NotificationModule_InitLibrary() == NOTIFICATION_MODULE_RESULT_SUCCESS) {
         gNotificationInitDone = true;
     }
+
+    int32_t hpadInitRes = HPADInit();
+    if (gNotificationInitDone) {
+        char msg[64];
+        snprintf(msg, sizeof(msg), "HPADInit res=%d", (int) hpadInitRes);
+        NotificationModule_AddInfoNotification(msg);
+    }
 }
 
 DEINITIALIZE_PLUGIN() {
@@ -22,4 +31,5 @@ DEINITIALIZE_PLUGIN() {
         NotificationModule_DeInitLibrary();
         gNotificationInitDone = false;
     }
+    HPADShutdown();
 }
