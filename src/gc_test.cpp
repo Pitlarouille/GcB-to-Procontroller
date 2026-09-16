@@ -12,16 +12,18 @@ DECL_FUNCTION(void, GX2CopyColorBufferToScanBuffer, GX2ColorBuffer *colorBuffer,
         static int frameCounter = 0;
         frameCounter++;
 
-        if (frameCounter >= 60) { // environ une fois par seconde
+        if (frameCounter >= 60) {
             frameCounter = 0;
 
-            HPADStatus status{};
-            int32_t res = HPADRead(HPAD_CHAN_0, &status, 1);
+            char msg[128];
+            int offset = 0;
+            for (int port = 0; port < 4; port++) {
+                HPADStatus status{};
+                int32_t res = HPADRead((HPADChan) port, &status, 1);
+                offset += snprintf(msg + offset, sizeof(msg) - offset, "P%d:%d ", port, (int) res);
+            }
 
             if (gNotificationInitDone) {
-                char msg[96];
-                snprintf(msg, sizeof(msg), "HPADRead res=%d err=%d hold=0x%04X",
-                         (int) res, (int) status.error, (unsigned int) status.hold);
                 NotificationModule_AddInfoNotification(msg);
             }
         }
