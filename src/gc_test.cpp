@@ -7,25 +7,22 @@
 
 extern bool gNotificationInitDone;
 
-#define GC_PORT_COUNT 4
-
 DECL_FUNCTION(void, GX2CopyColorBufferToScanBuffer, GX2ColorBuffer *colorBuffer, GX2ScanTarget scan_target) {
     if (scan_target == GX2_SCAN_TARGET_TV) {
-        static int32_t lastHold[GC_PORT_COUNT] = {0};
+        static int frameCounter = 0;
+        frameCounter++;
 
-        for (int port = 0; port < GC_PORT_COUNT; port++) {
+        if (frameCounter >= 60) { // environ une fois par seconde
+            frameCounter = 0;
+
             HPADStatus status{};
-            int32_t res = HPADRead((HPADChan) port, &status, 1);
+            int32_t res = HPADRead(HPAD_CHAN_0, &status, 1);
 
-            if (res > 0 && status.hold != lastHold[port] && status.hold != 0) {
-                if (gNotificationInitDone) {
-                    char msg[64];
-                    snprintf(msg, sizeof(msg), "Port %d hold: 0x%04X", port, (unsigned int) status.hold);
-                    NotificationModule_AddInfoNotification(msg);
-                }
-            }
-            if (res > 0) {
-                lastHold[port] = status.hold;
+            if (gNotificationInitDone) {
+                char msg[96];
+                snprintf(msg, sizeof(msg), "HPADRead res=%d err=%d hold=0x%04X",
+                         (int) res, (int) status.error, (unsigned int) status.hold);
+                NotificationModule_AddInfoNotification(msg);
             }
         }
     }
